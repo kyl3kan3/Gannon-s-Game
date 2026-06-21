@@ -1,0 +1,11 @@
+{
+  "name": "ratatouille-remys-kitchen-run",
+  "version": "1.0.0",
+  "description": "A Super-Mario-style platformer where Remy the rat dodges kitchen fire to cook the ratatouille. Zero dependencies, runs in any browser.",
+  "scripts": {
+    "test": "node test/headless.js",
+    "start": "python3 -m http.server 8080"
+  },
+  "keywords": ["game", "platformer", "canvas", "ratatouille", "html5"],
+  "license": "MIT"
+}

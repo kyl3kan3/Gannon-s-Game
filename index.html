@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ratatouille — Remy's Kitchen Run</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="stage">
+    <canvas id="game" width="960" height="560"></canvas>
+
+    <!-- On-screen controls for touch devices -->
+    <div id="touch-controls">
+      <div class="pad-left">
+        <button id="btn-left"  class="touch-btn" aria-label="Move left">◄</button>
+        <button id="btn-right" class="touch-btn" aria-label="Move right">►</button>
+      </div>
+      <div class="pad-right">
+        <button id="btn-jump" class="touch-btn jump" aria-label="Jump">JUMP</button>
+      </div>
+    </div>
+  </div>
+
+  <p id="hint">
+    Arrow keys / A &amp; D to move · Space or ↑ to jump · P pause · M mute ·
+    R restart kitchen
+  </p>
+
+  <!-- load order matters: each script attaches globals used by the next -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
