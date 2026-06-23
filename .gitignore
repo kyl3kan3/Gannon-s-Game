@@ -1,3 +1,7 @@
 node_modules/
 .DS_Store
 *.log
+
+# skill tooling (installed via `npx skills add`), not part of the game
+.agents/
+skills-lock.json

@@ -12,6 +12,10 @@ html, body {
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  /* crisper text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 #stage {
@@ -29,9 +33,14 @@ html, body {
   display: block;
   image-rendering: auto;
   border-radius: 8px;
-  box-shadow: 0 14px 50px rgba(0, 0, 0, 0.7), 0 0 0 3px rgba(255, 200, 120, 0.15);
   background: #000;
   touch-action: none;
+  /* layered transparent shadows read as natural depth on any background */
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.30),
+    0 8px 24px rgba(0, 0, 0, 0.45),
+    0 18px 50px rgba(0, 0, 0, 0.60),
+    0 0 0 3px rgba(255, 200, 120, 0.18);
 }
 
 #hint {
@@ -44,6 +53,7 @@ html, body {
   font-size: 12px;
   color: rgba(255, 233, 194, 0.55);
   pointer-events: none;
+  text-wrap: pretty;   /* avoid a lone orphan word on wrap */
 }
 
 /* -------- touch controls (hidden on desktop, shown on touch) -------- */
@@ -72,12 +82,35 @@ html, body {
   font-weight: bold;
   color: #fff;
   background: rgba(40, 24, 14, 0.55);
-  border: 2px solid rgba(255, 200, 120, 0.4);
   backdrop-filter: blur(2px);
   touch-action: none;
+  /* shadows over borders: soft depth + an inset ring instead of a hard 2px line */
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.35),
+    0 6px 16px rgba(0, 0, 0, 0.30),
+    inset 0 0 0 2px rgba(255, 200, 120, 0.40);
+  /* only the exact properties that change — never transition: all */
+  transition:
+    transform 0.08s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.12s ease,
+    box-shadow 0.12s ease;
+  will-change: transform;
 }
 
-.touch-btn:active { background: rgba(220, 120, 50, 0.7); }
+.touch-btn:active {
+  background: rgba(220, 120, 50, 0.7);
+  transform: scale(0.96);   /* tactile feedback on press */
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.40),
+    inset 0 0 0 2px rgba(255, 220, 150, 0.60);
+}
+
+.touch-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 2px rgba(255, 220, 150, 0.85);
+}
 
 .touch-btn.jump {
   width: 92px;
