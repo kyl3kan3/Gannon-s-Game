@@ -1,5 +1,5 @@
 /* =========================================================================
- * audio.js — procedural sound effects + light background music
+ * audio.js — procedural sound effects + a light background soundtrack.
  * Uses the Web Audio API so the game ships with zero asset files.
  * ========================================================================= */
 
@@ -21,17 +21,14 @@ const Sound = {
       this.master.connect(this.ctx.destination);
 
       this.musicGain = this.ctx.createGain();
-      this.musicGain.gain.value = 0.18;
+      this.musicGain.gain.value = 0.16;
       this.musicGain.connect(this.master);
     } catch (e) {
       this.ctx = null; // audio unsupported; game stays silent but playable
     }
   },
 
-  // Browsers require a user gesture before audio can start.
-  resume() {
-    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
-  },
+  resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
 
   toggle() {
     this.enabled = !this.enabled;
@@ -39,7 +36,6 @@ const Sound = {
     return this.enabled;
   },
 
-  // Core one-shot tone generator.
   tone(freq, dur, type = 'square', vol = 0.3, slideTo = null, dest = null) {
     if (!this.ctx || !this.enabled) return;
     const t = this.ctx.currentTime;
@@ -56,7 +52,7 @@ const Sound = {
     osc.stop(t + dur + 0.02);
   },
 
-  noise(dur, vol = 0.3, filterFreq = 1200) {
+  noise(dur, vol = 0.3, filterFreq = 1200, hp = false) {
     if (!this.ctx || !this.enabled) return;
     const t = this.ctx.currentTime;
     const len = Math.floor(this.ctx.sampleRate * dur);
@@ -66,7 +62,7 @@ const Sound = {
     const src = this.ctx.createBufferSource();
     src.buffer = buffer;
     const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
+    filter.type = hp ? 'highpass' : 'lowpass';
     filter.frequency.value = filterFreq;
     const gain = this.ctx.createGain();
     gain.gain.setValueAtTime(vol, t);
@@ -75,52 +71,56 @@ const Sound = {
     src.start(t);
   },
 
-  jump()  { this.tone(420, 0.16, 'square', 0.25, 720); },
-  coin()  { this.tone(880, 0.08, 'square', 0.25); this.tone(1320, 0.12, 'square', 0.2); },
-  stomp() { this.tone(300, 0.12, 'sawtooth', 0.3, 90); this.noise(0.1, 0.2, 800); },
-  hurt()  { this.tone(380, 0.32, 'sawtooth', 0.32, 70); },
-  fire()  { this.noise(0.18, 0.12, 600); },
+  // ---- one-shot effects -----------------------------------------------
+  jump()  { this.tone(420, 0.16, 'square', 0.22, 720); },
+  coin()  { this.tone(880, 0.07, 'square', 0.22); this.tone(1320, 0.12, 'square', 0.18); },
+  stomp() { this.tone(300, 0.12, 'sawtooth', 0.28, 90); this.noise(0.1, 0.18, 800); },
+  hurt()  { this.tone(380, 0.32, 'sawtooth', 0.3, 70); },
+  fire()  { this.noise(0.18, 0.1, 600); },
+  step()  { this.noise(0.03, 0.05, 2400, true); },        // soft footstep tick
+  land()  { this.tone(150, 0.1, 'sine', 0.22, 80); this.noise(0.06, 0.1, 500); },
+  combo(n) { this.tone(520 + n * 90, 0.1, 'square', 0.24); }, // pitch rises with combo
+  star()  { this.tone(1046, 0.12, 'triangle', 0.26); this.tone(1568, 0.16, 'triangle', 0.2); },
+
   clear() {
     const notes = [523, 659, 784, 1046];
-    notes.forEach((n, i) => setTimeout(() => this.tone(n, 0.18, 'square', 0.28), i * 110));
+    notes.forEach((n, i) => setTimeout(() => this.tone(n, 0.18, 'square', 0.26), i * 110));
   },
-  cook() {
-    // bubbling/sizzle while the pot cooks
-    this.noise(0.5, 0.12, 900);
-    this.tone(220, 0.4, 'sine', 0.18, 330);
-  },
+  cook() { this.noise(0.5, 0.1, 900); this.tone(220, 0.4, 'sine', 0.16, 330); },
   win() {
-    const notes = [523, 659, 784, 1046, 784, 1046, 1318];
-    notes.forEach((n, i) => setTimeout(() => this.tone(n, 0.22, 'square', 0.3), i * 140));
+    const notes = [523, 659, 784, 1046, 784, 1046, 1318, 1568];
+    notes.forEach((n, i) => setTimeout(() => this.tone(n, 0.22, 'square', 0.28), i * 140));
   },
   gameover() {
     const notes = [523, 415, 349, 261];
-    notes.forEach((n, i) => setTimeout(() => this.tone(n, 0.3, 'triangle', 0.3, n * 0.85), i * 200));
+    notes.forEach((n, i) => setTimeout(() => this.tone(n, 0.3, 'triangle', 0.28, n * 0.85), i * 200));
   },
 
-  // ---- simple looping background melody -------------------------------
-  // A cheerful little bistro tune. Plays one note every 8th-note tick.
+  // ---- looping soundtrack --------------------------------------------
+  // A cheerful bistro tune: melody + walking bass + off-beat hats.
   startMusic() {
     if (!this.ctx || this.musicTimer) return;
-    // C major / A minor friendly loop (MIDI-ish frequencies)
     const mel = [
-      523, 0, 659, 784, 523, 0, 659, 392,
-      440, 0, 523, 659, 587, 0, 494, 392,
-      523, 0, 659, 784, 880, 784, 659, 523,
-      587, 659, 698, 659, 587, 523, 494, 440,
+      659, 0, 784, 880, 784, 0, 659, 587,
+      523, 0, 659, 784, 659, 0, 523, 494,
+      587, 0, 698, 880, 988, 880, 784, 659,
+      784, 880, 988, 880, 784, 659, 587, 523,
     ];
-    const bass = [
-      131, 131, 165, 165, 175, 175, 196, 196,
-    ];
+    const bass = [131, 131, 165, 165, 196, 196, 175, 175];
     this.step = 0;
     this.musicTimer = setInterval(() => {
       if (!this.enabled || !this.ctx) return;
+      const g = this.musicGain;
       const n = mel[this.step % mel.length];
-      if (n > 0) this.tone(n, 0.16, 'triangle', 0.22, null, this.musicGain);
-      const b = bass[Math.floor(this.step / 4) % bass.length];
-      if (this.step % 4 === 0) this.tone(b, 0.4, 'sine', 0.3, null, this.musicGain);
+      if (n > 0) this.tone(n, 0.16, 'triangle', 0.2, null, g);
+      if (this.step % 4 === 0) {
+        const b = bass[Math.floor(this.step / 4) % bass.length];
+        this.tone(b, 0.42, 'sine', 0.28, null, g);
+        this.tone(b * 2, 0.2, 'triangle', 0.08, null, g);
+      }
+      if (this.step % 2 === 1) this.noise(0.03, 0.05, 3000, true); // hat
       this.step++;
-    }, 170);
+    }, 165);
   },
 
   stopMusic() {

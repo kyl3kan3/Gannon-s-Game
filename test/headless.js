@@ -245,6 +245,41 @@ console.log('\n=== Death & game-over handling ===');
   else fail(`retry failed (state=${game.state}, lives=${game.lives})`);
 }
 
+/* ----------------- juice: stomp combos, popups, stars --------------- */
+console.log('\n=== Juice: combos, popups & star ratings ===');
+{
+  const game = new Game(fakeCanvas);
+  game.loadLevel(0);
+  const bug = game.level.bugs[0];
+  // drop the player straight onto the bug
+  game.player.x = bug.x; game.player.y = bug.y - game.player.h + 2; game.player.vy = 5;
+  const s0 = game.score, f0 = game.floats.length;
+  game._collisions();
+  if (bug.dead && game.combo >= 1 && game.score > s0 && game.floats.length > f0)
+    ok('stomping a bug scores, combos, and spawns a floating popup');
+  else fail(`stomp juice failed (dead=${bug.dead}, combo=${game.combo}, dScore=${game.score - s0}, dFloats=${game.floats.length - f0})`);
+}
+{
+  const game = new Game(fakeCanvas);
+  game.loadLevel(0);
+  game.collected = game.level.totalIngredients; // all ingredients
+  game.levelHits = 0;                            // flawless
+  game.levelFrames = 120;
+  game._levelClear();
+  if (game.state === STATE.LEVEL_CLEAR && game.lastStars === 3) ok('flawless full-clear awards 3 stars');
+  else fail(`star rating failed (state=${game.state}, stars=${game.lastStars})`);
+}
+{
+  const game = new Game(fakeCanvas);
+  game.loadLevel(0);
+  game.collected = 0;      // missed ingredients
+  game.levelHits = 3;      // took hits
+  game.levelFrames = 120;
+  game._levelClear();
+  if (game.lastStars === 1) ok('a hurried, incomplete clear awards 1 star');
+  else fail(`expected 1 star, got ${game.lastStars}`);
+}
+
 /* --------------------- render every screen state -------------------- */
 console.log('\n=== Render smoke test (all screens) ===');
 {

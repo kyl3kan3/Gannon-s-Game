@@ -130,12 +130,23 @@ const RAW_LEVELS = [
   },
 ];
 
+/* Per-kitchen colour themes (looked up by level index). Each drives the
+ * parallax wall gradient, window glow accent, and the floor tile colours. */
+const LEVEL_THEMES = [
+  { top: '#f3e2c4', mid: '#e7c79a', bot: '#cf9f6b', accent: '#ffdca0', floor: '#8a6a3f', floorTop: '#b3894f', warm: '#ffedcf' },
+  { top: '#e2edf4', mid: '#b9d1e2', bot: '#8fabc4', accent: '#cfe6ff', floor: '#6c7886', floorTop: '#93a3b3', warm: '#eaf4ff' },
+  { top: '#f8dcb0', mid: '#eaa869', bot: '#c96f39', accent: '#ffb257', floor: '#7a5030', floorTop: '#a97040', warm: '#ffd9a8' },
+  { top: '#43263a', mid: '#7a2f28', bot: '#2c141c', accent: '#ff8a3a', floor: '#3a2630', floorTop: '#6a4038', warm: '#ffb07a' },
+  { top: '#fef0cf', mid: '#f2d59a', bot: '#d9ad63', accent: '#ffe9a8', floor: '#8a6a3a', floorTop: '#c79a5c', warm: '#fff2d0' },
+];
+
 /* ----------------------------- Level class --------------------------- */
 class Level {
   constructor(def, index) {
     this.name = def.name;
     this.subtitle = def.subtitle;
     this.index = index;
+    this.theme = LEVEL_THEMES[index % LEVEL_THEMES.length];
     this.isFinal = index === RAW_LEVELS.length - 1;
 
     this.rows = def.rows;

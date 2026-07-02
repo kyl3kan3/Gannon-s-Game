@@ -34,6 +34,13 @@ const CONFIG = {
   SCORE_STOMP: 250,
   SCORE_LEVEL_CLEAR: 1000,
 
+  // Game feel / juice
+  LOOKAHEAD: 130,        // camera leads in the direction you face
+  CAM_EASE: 0.11,
+  HITSTOP_STOMP: 4,      // frames of freeze on a squash
+  HITSTOP_HURT: 7,       // frames of freeze on taking a hit
+  COMBO_WINDOW: 80,      // frames to keep a stomp combo alive
+
   STEP_MS: 1000 / 60, // fixed simulation timestep
 };
 

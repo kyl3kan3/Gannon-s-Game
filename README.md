@@ -40,13 +40,22 @@ npx serve .                      # then open the printed URL
 - **Mind the gaps** in the tile floor — a running jump clears them.
 - **Stomp** kitchen bugs from above for points; touching one from the side hurts.
 - **Collect ingredients** (tomato, eggplant, pepper, mushroom, cheese) for score.
+- **Chain stomps** without landing to rack up **COMBOS** for escalating points.
 - Reach the **glowing door** to clear kitchens 1–4.
 - In **Gusteau's Grand Kitchen** (level 5) the pot only lights once you've
   collected **every** ingredient. Step up to the lit pot to cook and win.
 
+Each kitchen is graded **1–3 ⭐** — clear it **fast**, **unhurt**, and **fully
+stocked** for the full three stars, with score bonuses to match.
+
 You have 3 lives. A hit costs a life and gives you a moment of invincibility;
 fall in a pit and you respawn at the start of the kitchen. Out of lives? Retry
 the same kitchen. Your high score is saved locally between runs.
+
+**Game feel:** squash-&-stretch and dust puffs on every jump and landing, rising
+fire embers, hit-stop and screen-flash on impact, floating score popups, a
+camera that leads where you're heading, per-kitchen colour themes, a live
+progress bar + timer, and a full procedural soundtrack with footsteps.
 
 ## 🗂️ Project structure
 

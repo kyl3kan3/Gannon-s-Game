@@ -26,6 +26,10 @@ class Player {
     this.invuln = 0;
     this.dead = false;
     this.ridingPlatform = null;
+    this.sx = 1; this.sy = 1;        // squash & stretch (cosmetic)
+    this.justJumped = false;
+    this.justLanded = false;
+    this.blink = 0;
   }
 
   get cx() { return this.x + this.w / 2; }
@@ -42,6 +46,8 @@ class Player {
 
   update(level, platforms) {
     const C = CONFIG;
+    this.justJumped = false;
+    this.justLanded = false;
 
     // ---- horizontal input ----
     const accel = this.onGround ? C.MOVE_ACCEL : C.AIR_ACCEL;
@@ -64,6 +70,7 @@ class Player {
       this.coyote = 0;
       this.jumpBuffer = 0;
       this.ridingPlatform = null;
+      this.justJumped = true;
       Sound.jump();
     }
     // variable jump height: releasing early cuts the rise
@@ -104,6 +111,19 @@ class Player {
     // coyote time bookkeeping
     if (this.onGround) this.coyote = C.COYOTE_FRAMES;
     else if (wasGround && this.coyote === C.COYOTE_FRAMES) { /* keep */ }
+
+    // ---- landing + squash & stretch (cosmetic) ----
+    if (this.onGround && !wasGround) this.justLanded = true;
+    if (this.justLanded) { this.sx = 1.3; this.sy = 0.72; }
+    else {
+      const strength = Utils.clamp(Math.abs(this.vy) / 26, 0, 0.22);
+      const tsx = this.onGround ? 1 : 1 - strength;
+      const tsy = this.onGround ? 1 : 1 + strength;
+      this.sx += (tsx - this.sx) * 0.3;
+      this.sy += (tsy - this.sy) * 0.3;
+    }
+    if (this.blink > 0) this.blink--;
+    else if (this.onGround && Math.abs(this.vx) < 0.5 && Math.random() < 0.012) this.blink = 8;
 
     // ---- animation + timers ----
     if (this.onGround && Math.abs(this.vx) > 0.4) this.runT += 0.3 + Math.abs(this.vx) * 0.05;
@@ -153,9 +173,35 @@ class Player {
   }
 
   draw(ctx, chefHat) {
-    // blink while invulnerable
+    // flicker while invulnerable
     if (this.invuln > 0 && Math.floor(this.invuln / 4) % 2 === 0) return;
-    Sprites.drawRemy(ctx, this.x, this.y, this.w, this.h, this.face, this.runT, !this.onGround, chefHat);
+    Sprites.drawRemy(ctx, this.x, this.y, this.w, this.h, this.face, this.runT,
+                     !this.onGround, chefHat, this.sx, this.sy, this.blink > 0);
+  }
+}
+
+/* --------------------- floating score / combo text ------------------- */
+class FloatText {
+  constructor(x, y, text, color, size = 16) {
+    this.x = x; this.y = y; this.text = text; this.color = color; this.size = size;
+    this.life = 52; this.maxLife = 52; this.vy = -1.3;
+  }
+  update() { this.y += this.vy; this.vy *= 0.93; this.life--; }
+  get dead() { return this.life <= 0; }
+  draw(ctx) {
+    const a = Utils.clamp(this.life / this.maxLife, 0, 1);
+    const pop = this.life > this.maxLife - 6 ? 1.25 : 1;   // little pop on spawn
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.font = `bold ${this.size * pop}px 'Trebuchet MS', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+    ctx.strokeText(this.text, this.x, this.y);
+    ctx.fillStyle = this.color;
+    ctx.fillText(this.text, this.x, this.y);
+    ctx.restore();
   }
 }
 
