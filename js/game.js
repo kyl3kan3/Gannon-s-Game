@@ -36,7 +36,7 @@ class Game {
     this.titleT = 0;
     this._tap = false;
 
-    this.highScore = parseInt(localStorage.getItem('rat_highscore') || '0', 10);
+    this.highScore = parseInt(Utils.safeGet('rat_highscore') || '0', 10);
 
     const tap = () => { this._tap = true; Sound.init(); Sound.resume(); };
     canvas.addEventListener('mousedown', tap);
@@ -333,7 +333,7 @@ class Game {
   _saveHigh() {
     if (this.score > this.highScore) {
       this.highScore = this.score;
-      localStorage.setItem('rat_highscore', String(this.highScore));
+      Utils.safeSet('rat_highscore', String(this.highScore));
     }
   }
 
@@ -804,8 +804,9 @@ class Game {
 }
 
 /* ------------------------------ bootstrap ---------------------------- */
-window.addEventListener('load', () => {
+function bootRatatouille() {
   const canvas = document.getElementById('game');
+  if (!canvas) return;
   Input.init();
   Sound.init();
   const game = new Game(canvas);
@@ -818,4 +819,9 @@ window.addEventListener('load', () => {
   };
   window.addEventListener('resize', resize);
   resize();
-});
+}
+
+// Run as soon as the DOM is ready — whether this script is loaded normally
+// (file://) or injected after the page has already parsed (hosted preview).
+if (document.readyState === 'complete' || document.readyState === 'interactive') bootRatatouille();
+else window.addEventListener('DOMContentLoaded', bootRatatouille);

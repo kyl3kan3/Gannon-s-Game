@@ -21,6 +21,10 @@ const Utils = {
            a.y + a.h > b.y;
   },
 
+  // Safe localStorage access (sandboxed iframes / file:// can throw).
+  safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+  safeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) { /* ignore */ } },
+
   // Rounded rectangle path helper for the 2D context.
   roundRect(ctx, x, y, w, h, r) {
     r = Math.min(r, w / 2, h / 2);
